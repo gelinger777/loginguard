@@ -1,0 +1,16 @@
+{
+    "name": "gelinger777/loginguard",
+    "description": "LoginGuard for Wordpress",
+    "type": "wordpress-plugin",
+    "require": {
+     
+        "geoip2/geoip2": "~2.0"
+    },
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "LoginGuard",
+            "email": "team@dailyguard.io"
+        }
+    ]
+}

@@ -11,7 +11,15 @@ define('LOGINGUARD_URL', plugins_url('', LOGINGUARD_FILE));
 define('LOGINGUARD_PRO_URL', 'https://dailyguard.io/plugins/loginguard');
 define('LOGINGUARD_DOCS', 'https://loginguard.com/wiki/');
 
+   ini_set('display_errors', 1); 
+
+   
+ require_once  dirname(__FILE__)."/vendor/autoload.php";
 include_once(LOGINGUARD_DIR.'/functions.php');
+
+loginguard_get_country();
+
+
 
 // Ok so we are now ready to go
 register_activation_hook(LOGINGUARD_FILE, 'loginguard_activation');
@@ -1887,7 +1895,6 @@ function loginguard_page_brute_force(){
 		
 	</div>
 	
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 	<script>
 	function openTab(TabName) {
@@ -1937,33 +1944,22 @@ function loginguard_page_country_blocks(){
 	loginguard_page_header('LoginGuard - Country Block');
 	
 	// Load the blacklist and whitelist
-	$loginguard['blacklist'] = get_option('loginguard_blacklist');
-	$loginguard['whitelist'] = get_option('loginguard_whitelist');
+	$loginguard['blocked_countries'] = get_option('loginguard_blocked_countries');
 	
-	if(isset($_POST['save_lz'])){
+	
+	if(isset($_POST['save_cb'])){
 		
-		$max_retries = (int) loginguard_optpost('max_retries');
-		$lockout_time = (int) loginguard_optpost('lockout_time');
-		$max_lockouts = (int) loginguard_optpost('max_lockouts');
-		$lockouts_extend = (int) loginguard_optpost('lockouts_extend');
-		$reset_retries = (int) loginguard_optpost('reset_retries');
-		$notify_email = (int) loginguard_optpost('notify_email');
+		$blocked_countries = $_POST['countryblock'];
 		
-		$lockout_time = $lockout_time * 60;
-		$lockouts_extend = $lockouts_extend * 60 * 60;
-		$reset_retries = $reset_retries * 60 * 60;
-		
+                
+             
 		if(empty($error)){
 			
-			$option['max_retries'] = $max_retries;
-			$option['lockout_time'] = $lockout_time;
-			$option['max_lockouts'] = $max_lockouts;
-			$option['lockouts_extend'] = $lockouts_extend;
-			$option['reset_retries'] = $reset_retries;
-			$option['notify_email'] = $notify_email;
+			$option['blocked_countries'] = implode(",",$blocked_countries);
 			
+                        
 			// Save the options
-			update_option('loginguard_options', $option);
+			update_option('loginguard_blocked_countries', $option['blocked_countries']);
 			
 			$saved = true;
 			
@@ -1988,12 +1984,57 @@ function loginguard_page_country_blocks(){
         
         
 	// Reload the settings
-	$loginguard['blacklist_country'] = get_option('loginguard_blacklist');
-	$loginguard['whitelist_country'] = get_option('loginguard_whitelist');
+	$loginguard['blocked_countries'] = get_option('loginguard_blocked_countries');
+        
+        
+       // echo $loginguard['blocked_countries'];
+        
+
 	
 	?>
 
-	
+        <script type="text/javascript">
+            
+            
+            
+            
+            
+            jQuery(window).ready(function(){
+                
+                
+                
+                
+             var country_list=jQuery("#blockedList").val();   
+                
+               
+               
+               jQuery(".loginguardCountryCheckbox").each(function(i, obj) {
+
+
+
+               var thisVal=   jQuery(this).val();
+               
+               
+               
+             if (country_list.indexOf(thisVal) >= 0){
+                 
+                 jQuery(this).prop("checked",true);
+                 
+             }
+
+
+
+                   });
+               
+               
+               
+                
+                
+            })
+            
+            
+            
+            </script>
         
 	
 	<div id="" class="postbox">
@@ -2008,7 +2049,9 @@ function loginguard_page_country_blocks(){
 
 	<form action="" method="post">
 	<?php wp_nonce_field('loginguard-options'); ?>
-
+            <input type="hidden" name="save_cb" value="1">
+            
+            <input type="hidden" id="blockedList" value="<?php echo $loginguard['blocked_countries'];?>">
 	<div id="loginguardBulkBlockingContainer" style="margin-bottom: 10px;padding:15px;">
 			<a href="#" onclick="jQuery('.loginguardCountryCheckbox').prop('checked', true); return false;">Select All</a>&nbsp;&nbsp;
 			<a href="#" onclick="jQuery('.loginguardCountryCheckbox').prop('checked', false); return false;">Deselect All</a>&nbsp;&nbsp;

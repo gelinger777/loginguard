@@ -11,30 +11,24 @@ function _loginguard_getip(){
 	}
 }
 
-// Get the client IP
-function loginguard_getip(){
-	
-	global $loginguard;
-	
-	// Just so that we have something
-	$ip = _loginguard_getip();
-	
-	$loginguard['ip_method'] = (int) @$loginguard['ip_method'];
-	
-	if(isset($_SERVER["REMOTE_ADDR"])){
-		$ip = $_SERVER["REMOTE_ADDR"];
-	}
-	
-	if(isset($_SERVER["HTTP_X_FORWARDED_FOR"]) && @$loginguard['ip_method'] == 1){
-		$ip = $_SERVER["HTTP_X_FORWARDED_FOR"];
-	}
-	
-	if(isset($_SERVER["HTTP_CLIENT_IP"]) && @$loginguard['ip_method'] == 2){
-		$ip = $_SERVER["HTTP_CLIENT_IP"];
-	}
-	
-	return $ip;
-	
+// Function to get the client IP address
+function loginguard_getip() {
+    $ipaddress = '';
+    if (isset($_SERVER['HTTP_CLIENT_IP']))
+        $ipaddress = $_SERVER['HTTP_CLIENT_IP'];
+    else if(isset($_SERVER['HTTP_X_FORWARDED_FOR']))
+        $ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    else if(isset($_SERVER['HTTP_X_FORWARDED']))
+        $ipaddress = $_SERVER['HTTP_X_FORWARDED'];
+    else if(isset($_SERVER['HTTP_FORWARDED_FOR']))
+        $ipaddress = $_SERVER['HTTP_FORWARDED_FOR'];
+    else if(isset($_SERVER['HTTP_FORWARDED']))
+        $ipaddress = $_SERVER['HTTP_FORWARDED'];
+    else if(isset($_SERVER['REMOTE_ADDR']))
+        $ipaddress = $_SERVER['REMOTE_ADDR'];
+    else
+        $ipaddress = 'UNKNOWN';
+    return $ipaddress;
 }
 
 // Execute a select query and return an array
@@ -302,3 +296,42 @@ function loginguard_get_page($get = 'page', $resperpage = 50){
 	return $page;
 }
 
+use GeoIp2\Database\Reader;
+function loginguard_get_country(){
+   
+
+  
+
+
+// This creates the Reader object, which should be reused across
+// lookups.
+$reader = new Reader(dirname(__FILE__).'/geo/GeoLite2-Country.mmdb');
+
+// Replace "city" with the appropriate method for your database, e.g.,
+// "country".
+
+
+$my_ip= loginguard_getip();
+
+
+
+
+try{
+$record = $reader->country($my_ip);
+
+return $record->country->isoCode;
+}
+catch (Exception $e) {
+ if($my_ip==="127.0.0.1"){
+    
+  return  "localhost";
+}
+else{
+    
+  return  "LocalhostOrAbnormalIP";
+}
+    
+}
+ 
+    
+}
